@@ -1,1 +1,1 @@
-package fr.univ.hotel.dao;
+package fr.univ.hotel.dao.jdbc;
