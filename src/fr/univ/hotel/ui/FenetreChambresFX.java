@@ -11,6 +11,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
@@ -24,7 +25,6 @@ import javafx.stage.Stage;
 
 import java.util.List;
 import java.util.Optional;
-import javafx.scene.control.ButtonBar;
 public class FenetreChambresFX extends Application {
 
     private final ChambreDAO chambreDAO = new ChambreDAOJdbc();
@@ -34,8 +34,16 @@ public class FenetreChambresFX extends Application {
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Gestion des chambres (JavaFX)");
+        BorderPane root = creerContenu();
 
-        // ----- TableView -----
+        Scene scene = new Scene(root, 800, 500);
+        Styles.appliquerCssGlobal(scene);
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+    public BorderPane creerContenu() {
+        // TABLEVIEW
         table = new TableView<>();
         data = FXCollections.observableArrayList();
         table.setItems(data);
@@ -58,7 +66,7 @@ public class FenetreChambresFX extends Application {
 
         table.getColumns().addAll(colId, colNumero, colType, colPrix, colStatut);
 
-        // ----- Boutons -----
+        // BOUTONS
         Button btnReload = new Button("Recharger");
         Button btnAjouter = new Button("Ajouter");
         Button btnModifier = new Button("Modifier");
@@ -82,17 +90,15 @@ public class FenetreChambresFX extends Application {
         topBar.setAlignment(Pos.CENTER_LEFT);
         topBar.setPadding(new Insets(10));
 
-        // ----- Layout principal -----
+        // LAYOUT PRINCIPAL
         BorderPane root = new BorderPane();
         root.setTop(topBar);
         root.setCenter(table);
 
-        Scene scene = new Scene(root, 800, 500);
-        primaryStage.setScene(scene);
-        primaryStage.show();
-
         // Chargement initial
         chargerChambres();
+
+        return root;
     }
 
     private void chargerChambres() {
