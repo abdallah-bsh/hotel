@@ -11,6 +11,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
@@ -24,7 +25,6 @@ import javafx.stage.Stage;
 
 import java.util.List;
 import java.util.Optional;
-import javafx.scene.control.ButtonBar;
 public class FenetreChambresFX extends Application {
 
     private final ChambreDAO chambreDAO = new ChambreDAOJdbc();
@@ -34,8 +34,16 @@ public class FenetreChambresFX extends Application {
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Gestion des chambres (JavaFX)");
+        BorderPane root = creerContenu();
 
-        // ----- TableView -----
+        Scene scene = new Scene(root, 800, 500);
+        Styles.appliquerCssGlobal(scene);
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+    public BorderPane creerContenu() {
+        // TABLEVIEW
         table = new TableView<>();
         data = FXCollections.observableArrayList();
         table.setItems(data);
@@ -58,7 +66,7 @@ public class FenetreChambresFX extends Application {
 
         table.getColumns().addAll(colId, colNumero, colType, colPrix, colStatut);
 
-        // ----- Boutons -----
+        // BOUTONS
         Button btnReload = new Button("Recharger");
         Button btnAjouter = new Button("Ajouter");
         Button btnModifier = new Button("Modifier");
@@ -82,22 +90,24 @@ public class FenetreChambresFX extends Application {
         topBar.setAlignment(Pos.CENTER_LEFT);
         topBar.setPadding(new Insets(10));
 
-        // ----- Layout principal -----
+        // LAYOUT PRINCIPAL
         BorderPane root = new BorderPane();
         root.setTop(topBar);
         root.setCenter(table);
 
-        Scene scene = new Scene(root, 800, 500);
-        primaryStage.setScene(scene);
-        primaryStage.show();
-
         // Chargement initial
         chargerChambres();
+
+        return root;
     }
 
     private void chargerChambres() {
-        List<Chambre> chambres = chambreDAO.findAll();
-        data.setAll(chambres);
+        try {
+            List<Chambre> chambres = chambreDAO.findAll();
+            data.setAll(chambres);
+        } catch (Exception e) {
+            showError("Impossible de charger les chambres : " + e.getMessage());
+        }
     }
 
     private void ajouterChambre() {
@@ -121,7 +131,7 @@ public class FenetreChambresFX extends Application {
             String type = resType.get().trim().toUpperCase();
 
             // Prix
-            TextInputDialog dialogPrix = new TextInputDialog();
+            TextInputDialog dialogPrix = new TextInputDialog("50");
             dialogPrix.setTitle("Nouvelle chambre");
             dialogPrix.setHeaderText(null);
             dialogPrix.setContentText("Prix par nuit :");
@@ -129,15 +139,23 @@ public class FenetreChambresFX extends Application {
             if (resPrix.isEmpty()) return;
             double prix = Double.parseDouble(resPrix.get().trim());
 
+            // Statut (par défaut)
             String statut = "LIBRE";
 
-            Chambre c = new Chambre(0, numero, type, prix, statut);
+            // Création + insertion
+            Chambre c = new Chambre(numero, numero, statut, prix, statut);
+            c.setNumero(numero);
+            c.setType(type);
+            c.setPrixParNuit(prix);
+            c.setStatut(statut);
+
             boolean ok = chambreDAO.insert(c);
             if (ok) {
                 chargerChambres();
             } else {
                 showError("Erreur lors de l'insertion en base.");
             }
+
         } catch (NumberFormatException ex) {
             showError("Valeur numérique invalide.");
         } catch (Exception ex) {
@@ -160,11 +178,15 @@ public class FenetreChambresFX extends Application {
         Optional<ButtonType> res = confirm.showAndWait();
 
         if (res.isPresent() && res.get() == ButtonType.OK) {
-            boolean ok = chambreDAO.delete(selection);
-            if (ok) {
-                chargerChambres();
-            } else {
-                showError("Erreur lors de la suppression.");
+            try {
+                boolean ok = chambreDAO.delete(selection);
+                if (ok) {
+                    chargerChambres();
+                } else {
+                    showError("Erreur lors de la suppression.");
+                }
+            } catch (Exception e) {
+                showError("Erreur lors de la suppression : " + e.getMessage());
             }
         }
     }
@@ -205,11 +227,15 @@ public class FenetreChambresFX extends Application {
 
                 selection.setStatut(nouveauStatut);
 
-                boolean ok = chambreDAO.update(selection);
-                if (ok) {
-                    chargerChambres();
-                } else {
-                    showError("Erreur lors de la mise à jour du statut.");
+                try {
+                    boolean ok = chambreDAO.update(selection);
+                    if (ok) {
+                        chargerChambres();
+                    } else {
+                        showError("Erreur lors de la mise à jour du statut.");
+                    }
+                } catch (Exception e) {
+                    showError("Erreur lors de la mise à jour du statut : " + e.getMessage());
                 }
             }
         });
@@ -235,7 +261,7 @@ public class FenetreChambresFX extends Application {
             if (resNum.isEmpty()) return;
             int nouveauNumero = Integer.parseInt(resNum.get().trim());
 
-            // Type
+
             TextInputDialog dType = new TextInputDialog(selection.getType());
             dType.setTitle("Modifier une chambre");
             dType.setHeaderText(null);
@@ -261,12 +287,16 @@ public class FenetreChambresFX extends Application {
             selection.setPrixParNuit(nouveauPrix);
 
             // Mise à jour BD
-            boolean ok = chambreDAO.update(selection);
+            try {
+                boolean ok = chambreDAO.update(selection);
 
-            if (ok) {
-                chargerChambres();
-            } else {
-                showError("Erreur lors de la mise à jour.");
+                if (ok) {
+                    chargerChambres();
+                } else {
+                    showError("Erreur lors de la mise à jour.");
+                }
+            } catch (Exception ex) {
+                showError("Erreur lors de la mise à jour : " + ex.getMessage());
             }
 
         } catch (NumberFormatException e) {
