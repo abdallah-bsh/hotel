@@ -20,7 +20,8 @@ public class FenetrePrincipaleFX extends Application {
           BorderPane chambresContent = fenetreChambresFX.creerContenu();
         
           FenetreClientsFX clientsView = new FenetreClientsFX();
-         VueReservationsFX reservationsView = new VueReservationsFX();
+          FenetreReservationsFX reservationsView = new FenetreReservationsFX();
+
         
          // ONGLET CHAMBRES␊
          Tab tabChambres = new Tab("Chambres", chambresContent);
@@ -30,6 +31,7 @@ public class FenetrePrincipaleFX extends Application {
         Tab tabClients = new Tab("Clients", clientsView);
         tabClients.setClosable(false);
 
+     // ONGLET RESERVATIONS
         Tab tabReservations = new Tab("Réservations", reservationsView);
         tabReservations.setClosable(false);
 
