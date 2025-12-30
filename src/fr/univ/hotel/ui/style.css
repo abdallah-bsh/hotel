@@ -1,19 +1,105 @@
 .root {
     -fx-font-family: "Segoe UI", "Arial", sans-serif;
-    -fx-padding: 8;
+    -fx-background-color: #f5f5f5;
+    -fx-text-fill: #2b2b2b;
 }
 
-Button {
-    -fx-background-color: linear-gradient(to bottom, #4facfe, #00f2fe);
-    -fx-text-fill: #0b2b4d;
+/* Barre d'onglets et fond principal */
+TabPane {
+    -fx-padding: 12;
+}
+
+TabPane > .tab-header-area {
+    -fx-background-color: linear-gradient(#262626, #1b1b1b);
+    -fx-padding: 8;
+    -fx-border-color: transparent transparent #ff6600 transparent;
+    -fx-border-width: 0 0 3 0;
+}
+
+TabPane > .tab-header-area > .headers-region > .tab {
+    -fx-background-insets: 0;
+}
+
+.tab {
+    -fx-background-color: transparent;
+    -fx-text-base-color: #000000;
+    -fx-font-weight: bold;
+    -fx-padding: 8 14;
+}
+
+.tab:selected {
+    -fx-background-color: #ff6600;
+    -fx-text-base-color: white;
+    -fx-background-radius: 6 6 0 0;
+}
+
+.tab:selected .tab-label {
+    -fx-text-fill: white;
+}
+
+.tab .tab-label {
+    -fx-text-fill: #000000;
     -fx-font-weight: bold;
 }
 
-TabPane {
-    -fx-padding: 10;
+/* Boutons style opodo (orange vif) */
+Button {
+    -fx-background-color: linear-gradient(#ff7c1a, #ff6600);
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6;
+    -fx-padding: 8 16;
+    -fx-border-color: transparent;
 }
 
+Button:hover {
+    -fx-background-color: linear-gradient(#ff8f33, #ff7514);
+}
+
+Button:pressed {
+    -fx-background-color: linear-gradient(#e25d00, #cc5200);
+}
+
+/* Table */
 TableView {
-    -fx-border-color: #dcdcdc;
+    -fx-border-color: #dddddd;
     -fx-border-width: 1;
+    -fx-background-color: white;
+}
+
+TableView .column-header-background {
+    -fx-background-color: linear-gradient(#f2f2f2, #e5e5e5);
+}
+
+TableView .column-header, TableView .filler {
+    -fx-border-color: #d0d0d0;
+}
+
+TableView .table-row-cell:filled:selected {
+    -fx-background-color: #fff0e0;
+    -fx-text-fill: #000000;
+}
+
+TableView .table-cell:selected {
+    -fx-text-fill: #000000;
+}
+
+TableView .table-row-cell:selected .text,
+TableView .table-cell:selected .text {
+    -fx-fill: #000000;
+}
+
+/* Barre d'actions */
+.hbox {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 0 0 1 0;
+}
+
+/* Conteneur principal */
+BorderPane {
+    -fx-background-color: white;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0.3, 0, 4);
+    -fx-background-radius: 6;
+    -fx-padding: 10;
 }
