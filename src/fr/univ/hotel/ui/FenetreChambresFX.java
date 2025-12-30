@@ -1,6 +1,6 @@
 package fr.univ.hotel.ui;
 
-import fr.univ.hotel.dao.ChambreDAO;
+import fr.univ.hotel.dao.ChambreDAO;//je hais nizar
 import fr.univ.hotel.dao.jdbc.ChambreDAOJdbc;
 import fr.univ.hotel.metier.Chambre;
 import javafx.application.Application;
