@@ -9,6 +9,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ChambreDAOJdbc implements ChambreDAO {
+	
+	public ChambreDAOJdbc() {
+	        ensureTableExists();
+	    }
+
+	    private void ensureTableExists() {
+	        String ddl = """
+	                CREATE TABLE IF NOT EXISTS chambre (
+	                    id INT AUTO_INCREMENT PRIMARY KEY,
+	                    numero INT NOT NULL,
+	                    type VARCHAR(50) NOT NULL,
+	                    prix_par_nuit DOUBLE NOT NULL,
+	                    statut VARCHAR(50) NOT NULL
+	                )
+	                """;
+	        try (Connection cnx = ConnexionBD.getConnexion();
+	             Statement st = cnx.createStatement()) {
+	            st.executeUpdate(ddl);
+	        } catch (SQLException e) {
+	            throw new RuntimeException("Impossible d'initialiser la table chambre", e);
+	        }
+	    }
 
     private Chambre map(ResultSet rs) throws SQLException {
         int id = rs.getInt("id");

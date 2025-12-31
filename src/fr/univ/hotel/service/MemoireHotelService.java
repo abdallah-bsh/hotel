@@ -1,3 +1,4 @@
+
 package fr.univ.hotel.service;
 
 import fr.univ.hotel.metier.Chambre;
@@ -9,6 +10,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -47,6 +49,17 @@ public class MemoireHotelService {
                 .collect(Collectors.toUnmodifiableList());
     }
 
+    public static List<Chambre> getChambresDisponibles(LocalDate entree, LocalDate sortie) {
+        if (entree == null || sortie == null || !sortie.isAfter(entree)) {
+            return List.of();
+        }
+
+        return CHAMBRES.stream()
+                .filter(c -> "LIBRE".equalsIgnoreCase(c.getStatut()))
+                .filter(c -> estChambreDisponible(c, entree, sortie))
+                .collect(Collectors.toUnmodifiableList());
+    }
+
     public static List<Reservation> getReservations() {
         return Collections.unmodifiableList(RESERVATIONS);
     }
@@ -67,8 +80,11 @@ public class MemoireHotelService {
                 "CONFIRMEE"
         );
 
+        if (!estChambreDisponible(chambre, entree, sortie)) {
+            throw new IllegalArgumentException("La chambre n'est pas disponible pour ces dates.");
+        }
+
         RESERVATIONS.add(reservation);
-        chambre.setStatut("RESERVEE");
         return reservation;
     }
 
@@ -77,10 +93,42 @@ public class MemoireHotelService {
             return;
         }
         RESERVATIONS.remove(reservation);
-        Chambre chambre = reservation.getChambre();
-        if (chambre != null && "RESERVEE".equalsIgnoreCase(chambre.getStatut())) {
-            chambre.setStatut("LIBRE");
+    }
+
+    public static boolean estChambreDisponible(Chambre chambre, LocalDate entree, LocalDate sortie) {
+        if (chambre == null || entree == null || sortie == null || !sortie.isAfter(entree)) {
+            return false;
         }
+
+        return RESERVATIONS.stream()
+                .filter(r -> r.getChambre() != null)
+                .filter(r -> Objects.equals(r.getChambre().getId(), chambre.getId()))
+                .noneMatch(r -> chevauche(r, entree, sortie));
+    }
+
+    public static LocalDate prochaineReservation(Chambre chambre, LocalDate reference) {
+        LocalDate dateReference = reference == null ? LocalDate.now() : reference;
+
+        return RESERVATIONS.stream()
+                .filter(r -> r.getChambre() != null)
+                .filter(r -> Objects.equals(r.getChambre().getId(), chambre.getId()))
+                .map(Reservation::getDateEntree)
+                .filter(d -> d != null && !d.isBefore(dateReference))
+                .min(LocalDate::compareTo)
+                .orElse(null);
+    }
+
+    private static boolean chevauche(Reservation reservation, LocalDate entree, LocalDate sortie) {
+        LocalDate entreeExistante = reservation.getDateEntree();
+        LocalDate sortieExistante = reservation.getDateSortie();
+
+        if (entreeExistante == null || sortieExistante == null) {
+            return false;
+        }
+
+        boolean debutAvantSortieExistante = entree.isBefore(sortieExistante);
+        boolean sortieApresEntreeExistante = sortie.isAfter(entreeExistante);
+        return debutAvantSortieExistante && sortieApresEntreeExistante;
     }
 
     public static double calculerPrix(Chambre chambre, LocalDate entree, LocalDate sortie) {
