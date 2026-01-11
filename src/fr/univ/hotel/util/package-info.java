@@ -1,0 +1,1 @@
+package fr.univ.hotel.util;
